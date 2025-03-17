@@ -1,0 +1,38 @@
+apiVersion: apps/v1  # Correct API version for Deployment
+kind: Deployment
+metadata:
+  name: mongo-app
+spec:
+  replicas: 1  # This is for the number of pod replicas
+  selector:
+    matchLabels:
+      app: mongo-app
+  template:
+    metadata:
+      labels:
+        app: mongo-app
+    spec:
+      containers:
+       - name: mongo-app
+         image: mongo:latest
+         volumeMounts:
+           - mountPath: /data/db
+             name: mongo-vol
+      volumes:
+        - name: mongo-vol
+          persistentVolumeClaim:
+            claimName: host-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-mongodb
+spec:
+  selector:
+    app: mongo-app  # This should match the label in the Deployment
+  ports:
+     - name: tcp
+       port: 27017
+       targetPort: 27017
